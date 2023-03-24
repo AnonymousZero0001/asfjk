@@ -74,20 +74,21 @@ async def msg_config(username):
 	if config['proxy'] != "--":
 		proxy = "`SI`"
 		
-	msg = f"👨🏼‍💻 **CONFIGURACION LOCAL:**\n\n📤**<-Usuario:** `{config['user']}`\n"
+	msg = f"**CONFIGURACION LOCAL** 👨🏼‍💻\n\n📤**<-Usuario:** `{config['user']}`\n"
 	msg+=f"🔐**<-Contraseña:** `{config['passw']}`\n"
-	msg+=f"☁️**<-Host: {config['host']}\n"
+	msg+=f"☁️**<-Host:** {config['host']}\n"
 	msg+=f"ℹ️**<-Repo:** `{config['repoid']}`\n"
-	msg+=f"🧩**<-Zips:** `{config['zips']}`\n"
+	msg+=f"🧩**<-Zips:** `{config['zips']}`\n\n"
 	msg+=f"🇨🇺**<-Proxy:** `{proxy}`\n"
 	#msg+=f"✴ TOKEN: {config['custom_token']}\n\n"
 	#msg+=f"📁Descargado: {convertbytes(config['downloaded'])}\n"
-	msg+=f"⬆️**<-Subido:** `{convertbytes(config['uploaded'])}`\n"
+	msg+=f"⬆️**<-Subido: {convertbytes(config['uploaded'])}->**⬆️\n"
 	return msg
 	
 @bot.on_message()
 async def messages_handler(client: Client,message: Message):
 	msg = message.text
+	config = get_user(username)
 	username = message.from_user.username
 	entity_id = message.from_user.id
 	
@@ -118,7 +119,7 @@ async def messages_handler(client: Client,message: Message):
 		uploaded = user["uploaded"]
 		host = user["host"]
 		total = downloaded+uploaded
-		await message.reply(f"**VAIA TIENE ACCESO** 😏🔓\n💎 **User:** @{username}\n☁️ **Host:** {host}\n🗃️ **Trafico:** {convertbytes(total)}\n\n||Power by @dev_sorcerer||")
+		await message.reply(f"**VAIA TIENES ACCESO** 😏🔓\n\n💎 **User:** @{username}\n☁️ **Host:** {host}\n🗃️ **Trafico:** {convertbytes(total)}\n\n||Power by @dev_sorcerer||")
 	
 	if msg.lower().startswith("/acc"):
 		splitmsg = msg.split(" ")
@@ -140,7 +141,7 @@ async def messages_handler(client: Client,message: Message):
 	if msg.lower().startswith("/host"):
 		splitmsg = msg.split(" ")
 		
-		if len(splitmsg)!=2 and user["host"] == '--':
+		if len(splitmsg)!=2 or user["host"] == '--':
                     await message.reply("Configurar nube, ejemplo:\n`/host https://eduvirtual.uho.edu.cu")
 		else:
 			host = splitmsg[1]
@@ -183,7 +184,14 @@ async def messages_handler(client: Client,message: Message):
 				save_user(username,user)
 				msg = await msg_config(username)
 				await message.reply(msg)
-				
+	if msg.lower().startwith("/eval"):
+	    splitmsg=msg.split(" ")
+	    try:
+	        code = str(eval(splitmsg[1]))
+	    except:
+	        code = str(sys.exc_info())
+	        await message.reply(code)
+    
 	if msg.lower().startswith("/zips"):
 		splitmsg = msg.split(" ")
 		
@@ -271,7 +279,7 @@ async def messages_handler(client: Client,message: Message):
 			
 			user = msg_split[1]
 			del CONFIGS[user]
-			await message.reply("Has quitado a @{user} del bot 📯")
+			await message.reply(f"Has quitado a @{user} del bot 📯")
 		else:
 			return
 			
@@ -282,7 +290,7 @@ async def messages_handler(client: Client,message: Message):
 				size = int(response.headers.get("content-length"))
 				type = response.headers.get("content-type").split("/")[1]
 				path = os.path.join(os.getcwd(),f"{entity_id}",file_name)
-				messag = await bot.send_message(entity_id,"💠Preparando descarga💠")
+				messag = await bot.send_message(entity_id,"🤖**Preparando descarga**⬇️")
 				
 				file = await aiofiles.open(path,"wb")
 				chunkcurrent = 0
@@ -325,7 +333,7 @@ async def messages_handler(client: Client,message: Message):
 async def progress_download(chunkcurrent,total,file_name,start,message,messag):
 	speed = chunkcurrent / (time.time() - start)
 	percent = int(chunkcurrent * 100 / total)
-	msg = f"**DESCARGA EN PROGRESO**\n\n📱-Nombre: {file_name}\n"
+	msg = f"**DESCARGA EN PROGRESO...**\n\n📱-Nombre: {file_name}\n"
 	if file_name is None:
 		msg = ""
 	msg+=f"📥-Descargado: {convertbytes(chunkcurrent)}\n"
@@ -411,7 +419,7 @@ async def upload(pathfull,message,username):
 			    try:
 			        login = await client.login()
 			        if login:
-			            await message.edit("Subiendo mediante login ✅")
+			            await message.edit("☁️ __Subiendo mediante login__ 👨🏼‍💻")
 			            r = await client.upload_file_draft(pathfull,read_callback=lambda current,total,start: progress_upload(current,total,start,message,name))
 			            if r:
 			                links.append(r)
@@ -432,7 +440,7 @@ async def upload(pathfull,message,username):
 	    			with open(name+".txt","w") as txt:
 	    				txt.write(url+"\n")
 	    			try:
-	    				await message.edit(f"✅ Upload Done ✅\n📌 {name}\n📦{convertbytes(size)}\n\n🔗 Links 🔗\n{url}")
+	    				await message.edit(f"✅**Subida Exitosa**✅\n📌 <->{name}\n📦<->{convertbytes(size)}\n\n🔗 Link 🔗\n{url}")
 	    			except:
 	    				pass
 	    		await bot.send_document(username,name+".txt")
@@ -441,7 +449,7 @@ async def upload(pathfull,message,username):
 def progress_upload(current,total,start,message,file_name):
 	percent = int(current * 100 / total)
 	speed = current / (time.time() - start)
-	msg = f"**SUBIDA EN PROGRESO**\n\n📱-Nombre: {file_name}\n"
+	msg = f"**SUBIDA EN PROGRESO...**\n\n📱-Nombre: {file_name}\n"
 	msg+= f"📤-Subido: {convertbytes(current)}\n"
 	msg+=f"📦-Total: {convertbytes(total)}\n"
 	msg+=f"⚡-Velocidad: {convertbytes(speed)}/s\n"
