@@ -372,8 +372,8 @@ async def upload(pathfull,message,username):
 			error  = 0
 			links = []
 			while error < 10:
-                            login = await client.login()
-                            try:
+			    try:
+			        login = await client.login()
 			        if login:
 			            await message.edit("Subiendo mediante login ✅")
 			            r = await client.upload_file_draft(pathfull,read_callback=lambda current,total,start: progress_upload(current,total,start,message,f.split("/")[-1]))
@@ -408,8 +408,8 @@ async def upload(pathfull,message,username):
 			error  = 0
 			links = []
 			while error < 10:
-                            login = await client.login()
-                            try:
+			    try:
+			        login = await client.login()
 			        if login:
 			            await message.edit("Subiendo mediante login ✅")
 			            r = await client.upload_file_draft(pathfull,read_callback=lambda current,total,start: progress_upload(current,total,start,message,name))
