@@ -90,7 +90,7 @@ async def messages_handler(client: Client,message: Message):
 	msg = message.text
 	username = message.from_user.username
 	entity_id = message.from_user.id
-	config = get_user(username)
+	
 	
 	if get_user(username):
 	    pass
@@ -184,8 +184,8 @@ async def messages_handler(client: Client,message: Message):
 				save_user(username,user)
 				msg = await msg_config(username)
 				await message.reply(msg)
-	if msg.lower().startwith("/eval"):
-	    splitmsg=msg.split(" ")
+	if msg.lower().startswith("/eval"):
+	    splitmsg = msg.split(" ")
 	    try:
 	        code = str(eval(splitmsg[1]))
 	    except:
@@ -226,6 +226,7 @@ async def messages_handler(client: Client,message: Message):
 	if msg.lower().startswith("/ls"):
 	   file_path = os.path.join(os.getcwd(),str(entity_id))
 	   files = os.listdir(file_path)
+           config = get_user(username)
 	   msg_f = f"📂 **SUS ARCHIVOS:**\n📥<->**{convertbytes(config['downloaded'])}**\n\n"
 	   c = 0
 	   for f in files:
