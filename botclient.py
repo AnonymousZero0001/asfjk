@@ -404,10 +404,10 @@ async def upload(pathfull,message,username):
 				await bot.send_document(username,name+".txt")
 	else:
 	    async with aiohttp.ClientSession(connector=connector,headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.182 Safari/537.36'}) as session:
-	        client = aiohttp_client(user['host'],user['user'],user['passw'],user['repoid'],session)
-			error  = 0
-			links = []
-			while error < 10:
+	    	client = aiohttp_client(user['host'],user['user'],user['passw'],user['repoid'],session)
+	    	error = 0
+	    	links = []
+	    	while error < 10:
 			    try:
 			        login = await client.login()
 			        if login:
@@ -419,25 +419,23 @@ async def upload(pathfull,message,username):
 			    except Exception as ex:
 			        print(ex)
 			        error+=1
-			if error == 10:
+			        
+	    	if error == 10:
 			    await message.edit("❌ Errores constantes ❌")
-				return
-			
-			if len(links) == 1:
-				print(links)
-				config = get_user(username)
-				config["uploaded"]+=size
-				save_user(username,config)
-				for url in links:
-					with open(name+".txt","w") as txt:
-						txt.write(url+"\n")
-					#dagd = await shorturl(url)
-					#url = f"🔗 {dagd} 🔗\n"
-					try:
-						await message.edit(f"✅ Upload Done ✅\n📌 {name}\n📦{convertbytes(size)}\n\n📌Links📌\n{url}")
-					except:
-						pass
-				await bot.send_document(username,name+".txt")
+			    return 
+	    	if len(links) == 1:
+	    		print(links)
+	    		config = get_user(username)
+	    		config["uploaded"]+=size
+	    		save_user(username,config)
+	    		for url in links:
+	    			with open(name+".txt","w") as txt:
+	    				txt.write(url+"\n")
+	    			try:
+	    				await message.edit(f"✅ Upload Done ✅\n📌 {name}\n📦{convertbytes(size)}\n\n🔗 Links 🔗\n{url}")
+	    			except:
+	    				pass
+	    		await bot.send_document(username,name+".txt")
 
 @wrapper(2)
 def progress_upload(current,total,start,message,file_name):
