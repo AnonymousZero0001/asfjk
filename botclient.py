@@ -381,9 +381,9 @@ async def upload(pathfull,message,username):
 			            await bot.send_message(username,f"✅ Upload Done ✅\n📌 {Path(f).name}\n📦{convertbytes(Path(f).stat().st_size)}\n\n📌Links📌\n{r}")
 			            links.append(r)
 			        break
-			        except Exception as ex:
-			            print(ex)
-			            error+=1
+			    except Exception as ex:
+			        print(ex)
+			        error+=1
 			if error == 10:
 				await message.edit("Problemas en el servidor o puede ser q la cuenta halla sido banneada v:")
 				return
@@ -415,9 +415,9 @@ async def upload(pathfull,message,username):
 			        if r:
 			            links.append(r)
 			        break	
-			        except Exception as ex:
-			            print(ex)
-			            error+=1
+			    except Exception as ex:
+			        print(ex)
+			        error+=1
 			if error == 10:
 			    await message.edit("❌ Errores constantes ❌")
 				return
