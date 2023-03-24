@@ -1,0 +1,13 @@
+aiohttp
+aiofiles
+aiohttp_socks
+tgcrypto
+pyrogram
+multivolumefile
+#py7zr
+yarl
+bs4
+requests
+cryptg
+ujson
+flask
