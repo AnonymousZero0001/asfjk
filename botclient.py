@@ -140,11 +140,8 @@ async def messages_handler(client: Client,message: Message):
 	if msg.lower().startswith("/host"):
 		splitmsg = msg.split(" ")
 		
-		if len(splitmsg)!=2:
-		    if user["host"] == '--':
-			await message.reply("Configurar nube, ejemplo:\n`/host https://eduvirtual.uho.edu.cu")
-			else:
-			    await message.reply("Host ya configurado :D")
+		if len(splitmsg)!=2 and user["host"] == '--':
+                    await message.reply("Configurar nube, ejemplo:\n`/host https://eduvirtual.uho.edu.cu")
 		else:
 			host = splitmsg[1]
 			
