@@ -303,7 +303,7 @@ async def messages_handler(client: Client,message: Message):
 					await upload(path,messag,message.from_user.username)
 					
 
-	if msg.lower().startswith("/aula_gtm"):
+	if msg.lower().startswith("/set_edu"):
 		user = get_user(username)
 		if user:
 			user["user"] = ""
