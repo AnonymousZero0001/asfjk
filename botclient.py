@@ -372,15 +372,16 @@ async def upload(pathfull,message,username):
 			error  = 0
 			links = []
 			while error < 10:
-			    login = await client.login()
+                            try:
+			        login = await client.login()
 			    
-			    if login:
-			        await message.edit("Subiendo mediante login ✅")
-			        r = await client.upload_file_draft(pathfull,read_callback=lambda current,total,start: progress_upload(current,total,start,message,f.split("/")[-1]))
-			        if r:
-			            await bot.send_message(username,f"✅ Upload Done ✅\n📌 {Path(f).name}\n📦{convertbytes(Path(f).stat().st_size)}\n\n📌Links📌\n{r}")
-			            links.append(r)
-			        break
+			        if login:
+			            await message.edit("Subiendo mediante login ✅")
+			            r = await client.upload_file_draft(pathfull,read_callback=lambda current,total,start: progress_upload(current,total,start,message,f.split("/")[-1]))
+			            if r:
+			                await bot.send_message(username,f"✅ Upload Done ✅\n📌 {Path(f).name}\n📦{convertbytes(Path(f).stat().st_size)}\n\n📌Links📌\n{r}")
+			                links.append(r)
+			            break
 			    except Exception as ex:
 			        print(ex)
 			        error+=1
@@ -408,13 +409,14 @@ async def upload(pathfull,message,username):
 			error  = 0
 			links = []
 			while error < 10:
-			    login = await client.login()
-			    if login:
-			        await message.edit("Subiendo mediante login ✅")
-			        r = await client.upload_file_draft(pathfull,read_callback=lambda current,total,start: progress_upload(current,total,start,message,name))
-			        if r:
-			            links.append(r)
-			        break	
+                            try:
+			        login = await client.login()
+			        if login:
+			            await message.edit("Subiendo mediante login ✅")
+			            r = await client.upload_file_draft(pathfull,read_callback=lambda current,total,start: progress_upload(current,total,start,message,name))
+			            if r:
+			                links.append(r)
+			            break	
 			    except Exception as ex:
 			        print(ex)
 			        error+=1
