@@ -226,7 +226,7 @@ async def messages_handler(client: Client,message: Message):
 	if msg.lower().startswith("/ls"):
 	   file_path = os.path.join(os.getcwd(),str(entity_id))
 	   files = os.listdir(file_path)
-           config = get_user(username)
+	   config = get_user(username)
 	   msg_f = f"📂 **SUS ARCHIVOS:**\n📥<->**{convertbytes(config['downloaded'])}**\n\n"
 	   c = 0
 	   for f in files:
@@ -502,5 +502,6 @@ def convertbytes(size):
 if __name__ == "__main__":
 	try:
 		bot.run()
+		print('Bot Iniciado :D')
 	except Exception as exc:
 		print(exc)
