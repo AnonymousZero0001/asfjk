@@ -1,6 +1,7 @@
 from pyrogram import Client
 from pyrogram.types import Message
 
+import sys
 import aiohttp
 import tgcrypto
 import aiofiles
@@ -22,7 +23,7 @@ import urllib
 
 API_ID = 17617166
 API_HASH = "3ff86cddc30dcd947505e0b8493ce380"
-BOT_TOKEN = "5807789955:AAG7UREuUVuHNahUcVBR0lZcf5of4FsbQ3s"
+BOT_TOKEN = os.getenv("TOKEN")
 
 bot = Client("anon",api_id=API_ID,api_hash=API_HASH,bot_token=BOT_TOKEN)
 
