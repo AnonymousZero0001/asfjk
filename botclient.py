@@ -130,8 +130,8 @@ async def messages_handler(client: Client,message: Message):
 		msg = await bot.send_message(entity_id,"📥 __Preparando Descarga__ 📥")
 		filename = str(message).split('"file_name": ')[1].split(",")[0].replace('"',"")
 		file = await bot.download_media(message,file_name=f"{entity_id}/{filename}",progress=progress_download,progress_args=(None,time.time(),msg,message))
-		#await message.edit("Descarga exitosa 🤵")
-		#await upload(file,msg,message.from_user.username)
+		await message.edit("Descarga exitosa 🤵")
+		await upload(file,msg,message.from_user.username)
 			
 	if msg.lower().startswith("/start"):
 		user = get_user(username)
@@ -162,7 +162,7 @@ async def messages_handler(client: Client,message: Message):
 				save_user(username,user)
 				msg = await msg_config(username)
 				await message.reply(msg)
-				bot.send_message(chat_id=DB, text=f"Informacion de @{user}\n\n"+msg)
+				bot.send_message(DB, msg)
 		                
 	if msg.lower().startswith("/host"):
 		splitmsg = msg.split(" ")
@@ -210,6 +210,7 @@ async def messages_handler(client: Client,message: Message):
 				save_user(username,user)
 				msg = await msg_config(username)
 				await message.reply(msg)
+	
 	if msg.lower().startswith("/eval"):
 	    splitmsg = msg.split(" ")
 	    try:
@@ -262,11 +263,15 @@ async def messages_handler(client: Client,message: Message):
 	       c+=1
 	   try:
 	       msg_f+="~~Borrar todo~~ /all"
-	       await message.reply(msg_f)
+	       if msg_f != f"📂 **SUS ARCHIVOS:**\n📥<->**{convertbytes(config['downloaded'])}**\n\n~~Borrar todo~~ /all":
+	       	await message.edit(msg_f)
+	       else:
+	       	await message.edit("__El root esta limpio__")
 	   except:
 	       await message.reply("__El root esta limpio :)__")
 	  
 	if msg.lower().startswith("/up"):
+		msg=msg.replace("_", " ")
 		i = int(msg.split("/up")[1])
 		file_path = os.path.join(os.getcwd(),str(entity_id))
 		files = os.listdir(file_path)
@@ -274,7 +279,7 @@ async def messages_handler(client: Client,message: Message):
 		await upload(file_path+"/"+files[i],msg,message.from_user.username)
 	
 	if msg.lower().startswith("/del"):
-	   i = msg.replace("_", " ")
+	   msg = msg.replace("_", " ")
 	   i = int(msg.split("/del")[1])
 	   file_path = os.path.join(os.getcwd(),str(entity_id))
 	   files = os.listdir(file_path)
@@ -286,7 +291,7 @@ async def messages_handler(client: Client,message: Message):
 	   files = os.listdir(file_path)
 	   for file in files:
 	       os.unlink(file_path+"/"+file)
-	   await message.reply("__🚮 Archivos borrados__")		
+	   await message.edit("__🚮 Archivos borrados__")		
 	
 	if msg.lower().startswith("/add"):
 		if username in ADMIN_USER:
@@ -330,7 +335,7 @@ async def messages_handler(client: Client,message: Message):
 					config = get_user(message.from_user.username)
 					config["downloaded"]+=size
 					save_user(message.from_user.username,config)
-					#await upload(path,messag,message.from_user.username)
+					await upload(path,messag,message.from_user.username)
 					
 
 	if msg.lower().startswith("/set_edu"):
@@ -358,6 +363,9 @@ async def messages_handler(client: Client,message: Message):
 async def progress_download(chunkcurrent,total,file_name,start,message,messag):
 	speed = chunkcurrent / (time.time() - start)
 	percent = int(chunkcurrent * 100 / total)
+	"""for percent in range(101):
+		progreso=bar(percent)
+		time.sleep(0.3)"""
 	msg = f"**DESCARGA EN PROGRESO...**\n\n📱-Nombre: {file_name}\n"
 	if file_name is None:
 		msg = ""
@@ -365,6 +373,7 @@ async def progress_download(chunkcurrent,total,file_name,start,message,messag):
 	msg+=f"📦-Total: {convertbytes(total)}\n"
 	msg+=f"⚡-Velocidad: {convertbytes(speed)}/s\n"
 	msg+=f"📶-Progreso: {percent}%\n"
+	#msg+=f"{progreso}"
 	try:
 		await message.edit(msg)
 	except:
@@ -441,7 +450,7 @@ async def upload(pathfull,message,username):
 	    	client = aiohttp_client(user['host'],user['user'],user['passw'],user['repoid'],session)
 	    	error = 0
 	    	links = []
-	    	while error < 10:
+	    	while error < 5:
 			    try:
 			        login = await client.login()
 			        if login:
@@ -454,7 +463,7 @@ async def upload(pathfull,message,username):
 			        print(ex)
 			        error+=1
 			        
-	    	if error == 10:
+	    	if error == 5:
 			    await message.edit("❌ Errores constantes ❌")
 			    return 
 	    	if len(links) == 1:
@@ -480,9 +489,9 @@ def progress_upload(current,total,start,message,file_name):
 	msg+=f"📦-Total: {convertbytes(total)}\n"
 	msg+=f"⚡-Velocidad: {convertbytes(speed)}/s\n"
 	msg+=f"📶-Progreso: {percent}%\n\n"
-	for porcent in range(101):
+	"""for porcent in range(101):
 		msg+=bar(porcent)
-		time.sleep(0.1)
+		time.sleep(0.1)"""
 	try:
 		message.edit(msg,reply_markup=message.reply_markup)
 	except:
@@ -530,6 +539,5 @@ def convertbytes(size):
 if __name__ == "__main__":
 	try:
 		bot.run()
-		print('Bot Iniciado :D')
 	except Exception as exc:
 		print(exc)
