@@ -85,7 +85,7 @@ async def msg_config(username):
 	msg+=f"ℹ️**<-Repo:** `{config['repoid']}`\n"
 	msg+=f"🧩**<-Zips:** `{config['zips']}`\n\n"
 	msg+=f"🇨🇺**<-Proxy:** `{proxy}`\n\n"
-	msg+=f"🫡**<-Subida Auto:** `{config[auto]}`"
+	msg+=f"🫡**<-Subida Auto:** `{config['auto']}`"
 	#msg+=f"✴ TOKEN: {config['custom_token']}\n\n"
 	#msg+=f"📁Descargado: {convertbytes(config['downloaded'])}\n"
 	msg+=f"⬆️**<-Subido: {convertbytes(config['uploaded'])}->**⬆️\n"
@@ -126,29 +126,29 @@ async def messages_handler(client: Client,message: Message):
 		auto = user["auto"]
 			
 		if len(splitmsg)!=2:
-			await message.reply(f"🔼 **Subida automática:** 🔽\nActivada: 1 >_< Desactivada: 0\n**Actual:** {auto}\n\n__**Uso del cmd:**__\n`/auto 0` >_< `/auto 1`")
+			await message.reply(f"🔼 **Subida automática:** 🔽\nActivada: 1 >_< Desactivada: 0\n**Actual:** {auto}\n\n__**Uso del cmd:**__\n`/auto 0`  >_< `/auto 1`")
 		#Comprobando si es sonso ._.
-		elif splitmsg[1] != 1 or splitmsg[1] != 0:
+		elif splitmsg[1] != "1" or splitmsg[1] != "0":
 			await message.reply("._.")
 			return
 		#Comprobando si ya tine la configuracion ._.
 		elif user["auto"]==splitmsg[1]:
-					if splitmsg[1]==1:
+					if splitmsg[1]=="1":
 						await message.reply("Las subidas auto ya estan activadas ._.")
 		else:
 					await message.reply("Las subidas auto ya estan desactivadas ._.")
 		#Actibando...
-		if splitmsg[1]==0:
+		if splitmsg[1]=="0":
 					if user:
-						user["auto"] = 0
+						user["auto"] = "0"
 						save_user(username,user)
 						await message.reply("__Subida automática desactivada__ ⏸")
 		#Activando...
 		else:
 					if user:
-						user["auto"] = 1
+						user["auto"] = "1"
 						save_user(username,user)
-						await message.reply("__Subida automática activada__ ⏏")
+						await message.reply("__Subida automática activada__ 🔃")
 					
 	if msg.lower().startswith("/start"):
 		user = get_user(username)
@@ -223,6 +223,7 @@ async def messages_handler(client: Client,message: Message):
 				save_user(username,user)
 				msg = await msg_config(username)
 				await message.reply(msg)
+				
 	if msg.lower().startswith("/eval"):
 	    splitmsg = msg.replace("/eval", "")
 	    try:
@@ -361,7 +362,7 @@ async def messages_handler(client: Client,message: Message):
 					config = get_user(message.from_user.username)
 					config["downloaded"]+=size
 					save_user(message.from_user.username,config)
-					if user["auto"]==1:
+					if user["auto"]=="1":
 						await upload(path,messag,message.from_user.username)
 					
 					
