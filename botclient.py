@@ -36,7 +36,7 @@ ADMIN_USER = [
 
 
 def create_user(username):
-	CONFIGS[username] = {"name":username,"user":"--","passw":"--","host":"--","repoid":"--","zips":"--","proxy":"--","auto":"1","uploaded":0,"downloaded":0}
+	CONFIGS[username] = {"name":username,"user":"--","passw":"--","host":"--","repoid":"--","zips":"--","proxy":"--","auto":"True","uploaded":0,"downloaded":0}
 
 def save_user(username,config):
 	CONFIGS[username] = config
@@ -83,9 +83,9 @@ async def msg_config(username):
 	msg+=f"🔐**<-Contraseña:** `{config['passw']}`\n"
 	msg+=f"☁️**<-Host:** {config['host']}\n"
 	msg+=f"ℹ️**<-Repo:** `{config['repoid']}`\n"
-	msg+=f"🧩**<-Zips:** `{config['zips']}`\n\n"
-	msg+=f"🇨🇺**<-Proxy:** `{proxy}`\n\n"
-	msg+=f"🫡**<-Subida Auto:** `{config['auto']}`"
+	msg+=f"🧩**<-Zips:** `{config['zips']}`\n"
+	msg+=f"🇨🇺**<-Proxy:** `{proxy}`\n"
+	msg+=f"🫡**<-Subida Auto:** `{config['auto']}`\n\n"
 	#msg+=f"✴ TOKEN: {config['custom_token']}\n\n"
 	#msg+=f"📁Descargado: {convertbytes(config['downloaded'])}\n"
 	msg+=f"⬆️**<-Subido: {convertbytes(config['uploaded'])}->**⬆️\n"
@@ -96,7 +96,7 @@ async def messages_handler(client: Client,message: Message):
 	msg = message.text
 	username = message.from_user.username
 	entity_id = message.from_user.id
-	
+	upload_task = []
 	
 	if get_user(username):
 	    pass
@@ -126,27 +126,27 @@ async def messages_handler(client: Client,message: Message):
 		auto = user["auto"]
 			
 		if len(splitmsg)!=2:
-			await message.reply(f"🔼 **Subida automática:** 🔽\nActivada: 1 >_< Desactivada: 0\n**Actual:** {auto}\n\n__**Uso del cmd:**__\n`/auto 0`  >_< `/auto 1`")
+			await message.reply(f"🔼 **Subida automática:** 🔽\nActivada: True >_< Desactivada: False\n**Actual:** {auto}\n\n__**Uso del cmd:**__\n`/auto False`  >_< `/auto True`")
 		#Comprobando si es sonso ._.
-		elif splitmsg[1] != "1" or splitmsg[1] != "0":
+		if splitmsg[1] != "True" or splitmsg[1] != "False":
 			await message.reply("._.")
 			return
 		#Comprobando si ya tine la configuracion ._.
-		elif user["auto"]==splitmsg[1]:
-					if splitmsg[1]=="1":
+		if auto==splitmsg[1]:
+					if splitmsg[1]=="True":
 						await message.reply("Las subidas auto ya estan activadas ._.")
-		else:
-					await message.reply("Las subidas auto ya estan desactivadas ._.")
+					else:
+						await message.reply("Las subidas auto ya estan desactivadas ._.")
 		#Actibando...
-		if splitmsg[1]=="0":
+		if auto=="False":
 					if user:
-						user["auto"] = "0"
+						user["auto"] = "False"
 						save_user(username,user)
 						await message.reply("__Subida automática desactivada__ ⏸")
 		#Activando...
 		else:
 					if user:
-						user["auto"] = "1"
+						user["auto"] = "True"
 						save_user(username,user)
 						await message.reply("__Subida automática activada__ 🔃")
 					
@@ -274,12 +274,12 @@ async def messages_handler(client: Client,message: Message):
 	       size = Path(file_path+"/"+f).stat().st_size
 	       msg_f+=f"{c} - `{f}` <-> **{convertbytes(size)}**\n⬆️ __Subir__ - /up_{c} >_< 🗑 Borrar - /del_{c}\n\n"
 	       c+=1
+	       if str(files) == "[]":
+	       	await message.reply("__**El root esta vacio v:**__")
+	       	return
 	   try:
 	       msg_f+="~~Borrar todo~~ /all"
-	       if file_path == f"/opt/render/project/src/{str(entity_id)}":
-	       	await message.reply("__**El root esta vacio v:**__")
-	       else:
-	       	await message.reply(msg_f)
+	       await message.reply(msg_f)
 	   except:
 	       await message.reply("__El root esta limpio :)__")
 	  
@@ -292,7 +292,7 @@ async def messages_handler(client: Client,message: Message):
 		i = int(msg.split("/up")[1])
 		file_path = os.path.join(os.getcwd(),str(entity_id))
 		files = os.listdir(file_path)
-		if file_path == f"/opt/render/project/src/{str(entity_id)}":
+		if str(files) == "[]":
 			await message.reply("**Que mierda vas a subir si no tines nada en el root XD**")
 		else:
 			msg = await bot.send_message(entity_id,"📤 __**Preparando subida**__ 📤")
@@ -303,14 +303,16 @@ async def messages_handler(client: Client,message: Message):
 	   i = int(msg.split("/del")[1])
 	   file_path = os.path.join(os.getcwd(),str(entity_id))
 	   files = os.listdir(file_path)
+	   if str(files) == "[]":
+	   	await message.reply("__**Root limpio completamente**__")
 	   os.unlink(file_path+"/"+files[i])
 	   await message.reply("__🗑 Archivo borrado__")
 	
 	if msg.lower().startswith("/all"):
 	   file_path = os.path.join(os.getcwd(),str(entity_id))
 	   files = os.listdir(file_path)
-	   if len(files)==1:
-	   	await message.reply("__**No tiene ningun archivo :)**__")
+	   if str(files) == "[]":
+	   	await message.reply("__**No hay nada para borrar :D**__")
 	   	return
 	   for file in files:
 	       os.unlink(file_path+"/"+file)
@@ -362,9 +364,8 @@ async def messages_handler(client: Client,message: Message):
 					config = get_user(message.from_user.username)
 					config["downloaded"]+=size
 					save_user(message.from_user.username,config)
-					if user["auto"]=="1":
+					if user["auto"]=="True":
 						await upload(path,messag,message.from_user.username)
-					
 					
 
 	if msg.lower().startswith("/set_edu"):
@@ -403,11 +404,12 @@ async def progress_download(chunkcurrent,total,file_name,start,message,messag):
 		await message.edit(msg)
 	except:
 		pass
-	await message.edit("**Descarga completada** 🔽")
+	
 	if chunkcurrent == total:
 		config = get_user(messag.from_user.username)
 		config["downloaded"]+=total
 		save_user(messag.from_user.username,config)
+		await message.edit("**Descarga completada** 🔽")
 		return
 			
 async def upload(pathfull,message,username):
@@ -485,7 +487,8 @@ async def upload(pathfull,message,username):
 			            await message.edit("☁️ __Subiendo mediante login__ 👨🏼‍💻")
 			            r = await client.upload_file_draft(pathfull,read_callback=lambda current,total,start: progress_upload(current,total,start,message,name))
 			            if r:
-			                links.append(r)
+			            	upload_task.append(r)
+			            	links.append(r)
 			            break	
 			    except Exception as ex:
 			        print(ex)
