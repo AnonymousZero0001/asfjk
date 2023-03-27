@@ -29,10 +29,14 @@ bot = Client("uploader",api_id=API_ID,api_hash=API_HASH,bot_token=BOT_TOKEN)
 
 CONFIGS = {}
 DB = -971189031
-ADMIN_USER = "dev_sorcerer"
+ADMIN_USER = [
+"dev_sorcerer",
+"dev_thors"
+]
+
 
 def create_user(username):
-	CONFIGS[username] = {"name":username,"user":"--","passw":"--","host":"--","repoid":"--","zips":"--","proxy":"--","auto":1,"uploaded":0,"downloaded":0}
+	CONFIGS[username] = {"name":username,"user":"--","passw":"--","host":"--","repoid":"--","zips":"--","proxy":"--","auto":"1","uploaded":0,"downloaded":0}
 
 def save_user(username,config):
 	CONFIGS[username] = config
@@ -81,7 +85,7 @@ async def msg_config(username):
 	msg+=f"ℹ️**<-Repo:** `{config['repoid']}`\n"
 	msg+=f"🧩**<-Zips:** `{config['zips']}`\n\n"
 	msg+=f"🇨🇺**<-Proxy:** `{proxy}`\n\n"
-	msg+=f"🫡**<-Subida Auto:** `{auto}`"
+	msg+=f"🫡**<-Subida Auto:** `{config[auto]}`"
 	#msg+=f"✴ TOKEN: {config['custom_token']}\n\n"
 	#msg+=f"📁Descargado: {convertbytes(config['downloaded'])}\n"
 	msg+=f"⬆️**<-Subido: {convertbytes(config['uploaded'])}->**⬆️\n"
@@ -97,7 +101,7 @@ async def messages_handler(client: Client,message: Message):
 	if get_user(username):
 	    pass
 	else:
-	    if username == ADMIN_USER:
+	    if username in ADMIN_USER:
 	        create_user(username)
 	    else:
 	       await message.reply("🔒 **NO TIENE ACCESO** 🔒\nContacte al admin: [BigBOSS](https://t.me/dev_sorcerer)")
@@ -271,7 +275,10 @@ async def messages_handler(client: Client,message: Message):
 	       c+=1
 	   try:
 	       msg_f+="~~Borrar todo~~ /all"
-	       await message.reply(msg_f)
+	       if file_path == f"/opt/render/project/src/{str(entity_id)}":
+	       	await message.reply("__**El root esta vacio v:**__")
+	       else:
+	       	await message.reply(msg_f)
 	   except:
 	       await message.reply("__El root esta limpio :)__")
 	  
@@ -284,8 +291,11 @@ async def messages_handler(client: Client,message: Message):
 		i = int(msg.split("/up")[1])
 		file_path = os.path.join(os.getcwd(),str(entity_id))
 		files = os.listdir(file_path)
-		msg = await bot.send_message(entity_id,"📤 __**Preparando subida**__ 📤")
-		await upload(file_path+"/"+files[i],msg,message.from_user.username)
+		if file_path == f"/opt/render/project/src/{str(entity_id)}":
+			await message.reply("**Que mierda vas a subir si no tines nada en el root XD**")
+		else:
+			msg = await bot.send_message(entity_id,"📤 __**Preparando subida**__ 📤")
+			await upload(file_path+"/"+files[i],msg,message.from_user.username)
 	
 	if msg.lower().startswith("/del"):
 	   msg = msg.replace("_"," ")
