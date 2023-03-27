@@ -25,14 +25,14 @@ API_ID = 17617166
 API_HASH = "3ff86cddc30dcd947505e0b8493ce380"
 BOT_TOKEN = os.getenv("TOKEN")
 
-bot = Client("anon",api_id=API_ID,api_hash=API_HASH,bot_token=BOT_TOKEN)
+bot = Client("uploader",api_id=API_ID,api_hash=API_HASH,bot_token=BOT_TOKEN)
 
 CONFIGS = {}
 DB = -971189031
 ADMIN_USER = "dev_sorcerer"
 
 def create_user(username):
-	CONFIGS[username] = {"name":username,"user":"--","passw":"--","host":"--","repoid":"--","zips":"--","proxy":"--","uploaded":0,"downloaded":0}
+	CONFIGS[username] = {"name":username,"user":"--","passw":"--","host":"--","repoid":"--","zips":"--","proxy":"--","auto":1,"uploaded":0,"downloaded":0}
 
 def save_user(username,config):
 	CONFIGS[username] = config
@@ -81,6 +81,7 @@ async def msg_config(username):
 	msg+=f"ℹ️**<-Repo:** `{config['repoid']}`\n"
 	msg+=f"🧩**<-Zips:** `{config['zips']}`\n\n"
 	msg+=f"🇨🇺**<-Proxy:** `{proxy}`\n\n"
+	msg+=f"🫡**<-Subida Auto:** `{auto}`"
 	#msg+=f"✴ TOKEN: {config['custom_token']}\n\n"
 	#msg+=f"📁Descargado: {convertbytes(config['downloaded'])}\n"
 	msg+=f"⬆️**<-Subido: {convertbytes(config['uploaded'])}->**⬆️\n"
@@ -115,7 +116,36 @@ async def messages_handler(client: Client,message: Message):
 		#resp="Descarga de Telegram finalizada 🤵🏼‍♂")
 		#await msg.edit(resp)
 		#await upload(file,msg,message.from_user.username)
+	if msg.lower().startswith("/auto"):
+		splitmsg = msg.split(" ")
+		user = get_user(username)
+		auto = user["auto"]
 			
+		if len(splitmsg)!=2:
+			await message.reply(f"🔼 **Subida automática:** 🔽\nActivada: 1 >_< Desactivada: 0\n**Actual:** {auto}\n\n__**Uso del cmd:**__\n`/auto 0` >_< `/auto 1`")
+		#Comprobando si es sonso ._.
+		elif splitmsg[1] != 1 or splitmsg[1] != 0:
+			await message.reply("._.")
+			return
+		#Comprobando si ya tine la configuracion ._.
+		elif user["auto"]==splitmsg[1]:
+					if splitmsg[1]==1:
+						await message.reply("Las subidas auto ya estan activadas ._.")
+		else:
+					await message.reply("Las subidas auto ya estan desactivadas ._.")
+		#Actibando...
+		if splitmsg[1]==0:
+					if user:
+						user["auto"] = 0
+						save_user(username,user)
+						await message.reply("__Subida automática desactivada__ ⏸")
+		#Activando...
+		else:
+					if user:
+						user["auto"] = 1
+						save_user(username,user)
+						await message.reply("__Subida automática activada__ ⏏")
+					
 	if msg.lower().startswith("/start"):
 		user = get_user(username)
 		downloaded = user["downloaded"]
@@ -248,7 +278,7 @@ async def messages_handler(client: Client,message: Message):
 	if msg.lower().startswith("/up"):
 		user = get_user(username)
 		if user["passw"] == "--":
-			await message.reply("Configure primero su user/pass del la cuenta ._.\n`/acc user pass`")
+			await message.reply("Configure primero su **user/pass** del la cuenta ._.\n`/acc user pass`")
 			return
 		msg = msg.replace("_"," ")
 		i = int(msg.split("/up")[1])
@@ -268,6 +298,9 @@ async def messages_handler(client: Client,message: Message):
 	if msg.lower().startswith("/all"):
 	   file_path = os.path.join(os.getcwd(),str(entity_id))
 	   files = os.listdir(file_path)
+	   if len(files)==1:
+	   	await message.reply("__**No tiene ningun archivo :)**__")
+	   	return
 	   for file in files:
 	       os.unlink(file_path+"/"+file)
 	   await message.reply("__🚮 Archivos borrados__")
@@ -318,7 +351,9 @@ async def messages_handler(client: Client,message: Message):
 					config = get_user(message.from_user.username)
 					config["downloaded"]+=size
 					save_user(message.from_user.username,config)
-					await upload(path,messag,message.from_user.username)
+					if user["auto"]==1:
+						await upload(path,messag,message.from_user.username)
+					
 					
 
 	if msg.lower().startswith("/set_edu"):
@@ -348,7 +383,7 @@ async def progress_download(chunkcurrent,total,file_name,start,message,messag):
 	percent = int(chunkcurrent * 100 / total)
 	msg = f"**DESCARGA EN PROGRESO...**\n\n📱-Nombre: {file_name}\n"
 	if file_name is None:
-		msg = "**DESCARGA EN PROGRESO..**"
+		msg = "**DESCARGA EN PROGRESO..\n\n**"
 	msg+=f"📥-Descargado: {convertbytes(chunkcurrent)}\n"
 	msg+=f"📦-Total: {convertbytes(total)}\n"
 	msg+=f"⚡-Velocidad: {convertbytes(speed)}/s\n"
@@ -357,12 +392,12 @@ async def progress_download(chunkcurrent,total,file_name,start,message,messag):
 		await message.edit(msg)
 	except:
 		pass
-	
+	await message.edit("**Descarga completada** 🔽")
 	if chunkcurrent == total:
-		await message.edit("**Descarga completada** 🔽")
 		config = get_user(messag.from_user.username)
 		config["downloaded"]+=total
 		save_user(messag.from_user.username,config)
+		return
 			
 async def upload(pathfull,message,username):
 	user = get_user(username)
@@ -387,7 +422,9 @@ async def upload(pathfull,message,username):
 		zips.close()
 		files.close()
 		FILES = files.files
-		await message.edit("**Comprimido en partes de {zips}MB**")
+		zips = user["zips"]
+		await message.edit(f"**Comprimido en partes de {zips}MiB**")
+		return
 
 		
 		"""async with aiohttp.ClientSession(connector=connector,headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.182 Safari/537.36'}) as session:
