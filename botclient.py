@@ -16,7 +16,6 @@ from pathlib import Path
 import zipfile
 #from py7 import zip
 
-import time
 import json
 import os
 import time
@@ -30,10 +29,7 @@ bot = Client("anon",api_id=API_ID,api_hash=API_HASH,bot_token=BOT_TOKEN)
 
 CONFIGS = {}
 DB = -971189031
-ADMIN_USER = [
-	"dev_sorcerer",
-	"dev_thors"
-	]
+ADMIN_USER = "dev_sorcerer"
 
 def create_user(username):
 	CONFIGS[username] = {"name":username,"user":"--","passw":"--","host":"--","repoid":"--","zips":"--","proxy":"--","uploaded":0,"downloaded":0}
@@ -83,27 +79,13 @@ async def msg_config(username):
 	msg+=f"🔐**<-Contraseña:** `{config['passw']}`\n"
 	msg+=f"☁️**<-Host:** {config['host']}\n"
 	msg+=f"ℹ️**<-Repo:** `{config['repoid']}`\n"
-	msg+=f"🧩**<-Zips:** `{config['zips']}`\n"
+	msg+=f"🧩**<-Zips:** `{config['zips']}`\n\n"
 	msg+=f"🇨🇺**<-Proxy:** `{proxy}`\n\n"
 	#msg+=f"✴ TOKEN: {config['custom_token']}\n\n"
 	#msg+=f"📁Descargado: {convertbytes(config['downloaded'])}\n"
 	msg+=f"⬆️**<-Subido: {convertbytes(config['uploaded'])}->**⬆️\n"
 	return msg
 	
-def bar(percentage):
-  hashes = int(percentage / 6)
-  spaces = 20 - hashes
-
-  progress_bar =  "•" * hashes + "×" * spaces 
-
-  percentage_pos = int(hashes / 1)
-
-  percentage_string = str(percentage) + "%"
-  
-  progress_bar = "[" + progress_bar[:percentage_pos] + percentage_string + progress_bar[percentage_pos + len(percentage_string):] + "]"
-
-  print(progress_bar, end="\r")
-
 @bot.on_message()
 async def messages_handler(client: Client,message: Message):
 	msg = message.text
@@ -114,7 +96,7 @@ async def messages_handler(client: Client,message: Message):
 	if get_user(username):
 	    pass
 	else:
-	    if username in ADMIN_USER:
+	    if username == ADMIN_USER:
 	        create_user(username)
 	    else:
 	       await message.reply("🔒 **NO TIENE ACCESO** 🔒\nContacte al admin: [BigBOSS](https://t.me/dev_sorcerer)")
@@ -125,13 +107,14 @@ async def messages_handler(client: Client,message: Message):
 	else:
 		os.mkdir(f"{os.getcwd()}/{entity_id}/")
 	
-	
+	#Descarga de Telegram pos v:
 	if message.document or message.audio or message.video:
-		msg = await bot.send_message(entity_id,"📥 __Preparando Descarga__ 📥")
+		msg = await bot.send_message(entity_id,"💠 Preparando descarga 💠")
 		filename = str(message).split('"file_name": ')[1].split(",")[0].replace('"',"")
 		file = await bot.download_media(message,file_name=f"{entity_id}/{filename}",progress=progress_download,progress_args=(None,time.time(),msg,message))
-		await message.edit("Descarga exitosa 🤵")
-		await upload(file,msg,message.from_user.username)
+		#resp="Descarga de Telegram finalizada 🤵🏼‍♂")
+		#await msg.edit(resp)
+		#await upload(file,msg,message.from_user.username)
 			
 	if msg.lower().startswith("/start"):
 		user = get_user(username)
@@ -143,15 +126,12 @@ async def messages_handler(client: Client,message: Message):
 	
 	if msg.lower().startswith("/acc"):
 		splitmsg = msg.split(" ")
-		
 		if len(splitmsg)==1:
 			msg = await msg_config(username)
 			await message.reply(msg)
-			
-		if len(splitmsg)!=3 and len(splitmsg)!=1:
+		elif len(splitmsg)!=3 and len(splitmsg)!=1:
 			await message.reply("Configurar su cuenta, ejemplo:\n`/acc user password`")
-		
-		if len(splitmsg)==3:
+		else:
 			usern = splitmsg[1]
 			password = splitmsg[2]
 			
@@ -162,12 +142,11 @@ async def messages_handler(client: Client,message: Message):
 				save_user(username,user)
 				msg = await msg_config(username)
 				await message.reply(msg)
-				bot.send_message(DB, msg)
 		                
 	if msg.lower().startswith("/host"):
 		splitmsg = msg.split(" ")
 		
-		if len(splitmsg)!=2 or user["host"] == '--':
+		if len(splitmsg)!=2:
                     await message.reply("Configurar nube, ejemplo:\n`/host https://eduvirtual.uho.edu.cu")
 		else:
 			host = splitmsg[1]
@@ -210,11 +189,10 @@ async def messages_handler(client: Client,message: Message):
 				save_user(username,user)
 				msg = await msg_config(username)
 				await message.reply(msg)
-	
 	if msg.lower().startswith("/eval"):
-	    splitmsg = msg.split(" ")
+	    splitmsg = msg.replace("/eval", "")
 	    try:
-	        code = str(eval(splitmsg[1]))
+	        code = str(eval(splitmsg))
 	        await message.reply(code)
 	    except:
 	        code = str(sys.exc_info())
@@ -223,7 +201,7 @@ async def messages_handler(client: Client,message: Message):
 	if msg.lower().startswith("/zips"):
 		splitmsg = msg.split(" ")
 		
-		if len(splitmsg)!=2 or splitmsg[1]>str(510):
+		if len(splitmsg)!=2 or splitmsg[1]>str(500):
 			await message.reply("❎ ERROR ❎")
 		else:
 			zips = splitmsg[1]
@@ -263,23 +241,24 @@ async def messages_handler(client: Client,message: Message):
 	       c+=1
 	   try:
 	       msg_f+="~~Borrar todo~~ /all"
-	       if msg_f != f"📂 **SUS ARCHIVOS:**\n📥<->**{convertbytes(config['downloaded'])}**\n\n~~Borrar todo~~ /all":
-	       	await message.edit(msg_f)
-	       else:
-	       	await message.edit("__El root esta limpio__")
+	       await message.reply(msg_f)
 	   except:
 	       await message.reply("__El root esta limpio :)__")
 	  
 	if msg.lower().startswith("/up"):
-		msg=msg.replace("_", " ")
+		user = get_user(username)
+		if user["passw"] == "--":
+			await message.reply("Configure primero su user/pass del la cuenta ._.\n`/acc user pass`")
+			return
+		msg = msg.replace("_"," ")
 		i = int(msg.split("/up")[1])
 		file_path = os.path.join(os.getcwd(),str(entity_id))
 		files = os.listdir(file_path)
-		msg = await bot.send_message(entity_id,"💠 Preparando subida 💠")
+		msg = await bot.send_message(entity_id,"📤 __**Preparando subida**__ 📤")
 		await upload(file_path+"/"+files[i],msg,message.from_user.username)
 	
 	if msg.lower().startswith("/del"):
-	   msg = msg.replace("_", " ")
+	   msg = msg.replace("_"," ")
 	   i = int(msg.split("/del")[1])
 	   file_path = os.path.join(os.getcwd(),str(entity_id))
 	   files = os.listdir(file_path)
@@ -291,7 +270,7 @@ async def messages_handler(client: Client,message: Message):
 	   files = os.listdir(file_path)
 	   for file in files:
 	       os.unlink(file_path+"/"+file)
-	   await message.edit("__🚮 Archivos borrados__")		
+	   await message.reply("__🚮 Archivos borrados__")
 	
 	if msg.lower().startswith("/add"):
 		if username in ADMIN_USER:
@@ -314,6 +293,10 @@ async def messages_handler(client: Client,message: Message):
 			return
 			
 	if msg.lower().startswith("https"):
+		user = get_user(username)
+		if user["user"] == "--":
+			await message.reply("Configure primero su user/pass del la cuenta ._.\n`/acc user pass`")
+			return
 		async with aiohttp.ClientSession() as session:
 			async with session.get(message.text) as response:
 				file_name = response.content_disposition.filename
@@ -341,8 +324,8 @@ async def messages_handler(client: Client,message: Message):
 	if msg.lower().startswith("/set_edu"):
 		user = get_user(username)
 		if user:
-			user["user"] = ""
-			user["passw"] = ""
+			user["user"] = "--"
+			user["passw"] = "--"
 			user["host"] = "https://eduvirtual.uho.edu.cu"
 			user["repoid"] = "3"
 			user["zips"] = 500
@@ -363,23 +346,20 @@ async def messages_handler(client: Client,message: Message):
 async def progress_download(chunkcurrent,total,file_name,start,message,messag):
 	speed = chunkcurrent / (time.time() - start)
 	percent = int(chunkcurrent * 100 / total)
-	"""for percent in range(101):
-		progreso=bar(percent)
-		time.sleep(0.3)"""
 	msg = f"**DESCARGA EN PROGRESO...**\n\n📱-Nombre: {file_name}\n"
 	if file_name is None:
-		msg = ""
+		msg = "**DESCARGA EN PROGRESO..**"
 	msg+=f"📥-Descargado: {convertbytes(chunkcurrent)}\n"
 	msg+=f"📦-Total: {convertbytes(total)}\n"
 	msg+=f"⚡-Velocidad: {convertbytes(speed)}/s\n"
 	msg+=f"📶-Progreso: {percent}%\n"
-	#msg+=f"{progreso}"
 	try:
 		await message.edit(msg)
 	except:
 		pass
 	
 	if chunkcurrent == total:
+		await message.edit("**Descarga completada** 🔽")
 		config = get_user(messag.from_user.username)
 		config["downloaded"]+=total
 		save_user(messag.from_user.username,config)
@@ -407,7 +387,7 @@ async def upload(pathfull,message,username):
 		zips.close()
 		files.close()
 		FILES = files.files
-		await message.edit("Partes guardadas ⬇")
+		await message.edit("**Comprimido en partes de {zips}MB**")
 
 		
 		"""async with aiohttp.ClientSession(connector=connector,headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.182 Safari/537.36'}) as session:
@@ -475,10 +455,10 @@ async def upload(pathfull,message,username):
 	    			with open(name+".txt","w") as txt:
 	    				txt.write(url+"\n")
 	    			try:
-	    				await message.edit(f"✅**Subida Exitosa**✅\n📌 <->{name}\n📦<->{convertbytes(size)}\n\n🔗 Link 🔗\n{url}")
+	    				await message.edit(f"🚀 **Subida Exitosa** 🚀\n• {name}\n• **[{convertbytes(size)}]**\n\n🔗 Link 🔗\n{url}")
 	    			except:
 	    				pass
-	    		await bot.send_document(DB, name+".txt")
+	    		await bot.send_document(DB,name+".txt")
 
 @wrapper(2)
 def progress_upload(current,total,start,message,file_name):
@@ -488,10 +468,7 @@ def progress_upload(current,total,start,message,file_name):
 	msg+= f"📤-Subido: {convertbytes(current)}\n"
 	msg+=f"📦-Total: {convertbytes(total)}\n"
 	msg+=f"⚡-Velocidad: {convertbytes(speed)}/s\n"
-	msg+=f"📶-Progreso: {percent}%\n\n"
-	"""for porcent in range(101):
-		msg+=bar(porcent)
-		time.sleep(0.1)"""
+	msg+=f"📶-Progreso: {percent}%\n"
 	try:
 		message.edit(msg,reply_markup=message.reply_markup)
 	except:
@@ -539,5 +516,6 @@ def convertbytes(size):
 if __name__ == "__main__":
 	try:
 		bot.run()
+		print('Bot Iniciado :D')
 	except Exception as exc:
 		print(exc)
