@@ -80,7 +80,7 @@ async def msg_config(username):
 	if config['proxy'] != "--":
 		proxy = "`SI`"
 		
-	msg = f"**<\>CONFIGURACION LOCAL</>**\n\n📤**<-Usuario:** `{config['user']}`\n"
+	msg = f"**<\>CONFIGURACION LOCAL<\>**\n\n📤**<-Usuario:** `{config['user']}`\n"
 	msg+=f"🔐**<-Contraseña:** `{config['passw']}`\n"
 	msg+=f"☁️**<-Host:** {config['host']}\n"
 	msg+=f"ℹ️**<-Repo:** `{config['repoid']}`\n"
@@ -130,7 +130,7 @@ async def messages_handler(client: Client,message: Message):
 		auto = user["auto"]
 		config = splitmsg[1]
 			
-		if len(splitmsg) != 2 or len(splitmsg) == 1:
+		if msg == "/auto" or len(splitmsg) != 2:
 			await message.reply(f"🔼 **Subida automática:** 🔽\nActivada: True >_< Desactivada: False\n**Actual:** {auto}\n\n__**Uso del cmd:**__\n`/auto False`  >_< `/auto True`")
 			return
 		#Comprobando si ya tine la configuracion ._.
@@ -276,7 +276,7 @@ async def messages_handler(client: Client,message: Message):
 	   c = 0
 	   for f in files:
 	       size = Path(file_path+"/"+f).stat().st_size
-	       msg_f+=f"{c} - `{f}` <-> **{convertbytes(size)}**\n⬆️ __Subir__ - /up_{c} >_< 🗑 Borrar - /del_{c}\n\n"
+	       msg_f+=f"**{c}** -`{f}`\n⬆️ - /up_{c} >_< 🗑 - /del_{c} **[\n\n"
 	       c+=1
 	   if str(files) == "[]":
 	       	await message.reply("__**El root esta vacio v:**__")
@@ -316,7 +316,7 @@ async def messages_handler(client: Client,message: Message):
 	   file_path = os.path.join(os.getcwd(),str(entity_id))
 	   files = os.listdir(file_path)
 	   if str(files) == "[]":
-	   	await message.reply("__**No hay nada para borrar :D**__")
+	   	await message.reply("__**No hay nada para borrar**__ **:D**")
 	   	return
 	   for file in files:
 	       os.unlink(file_path+"/"+file)
@@ -371,6 +371,7 @@ async def messages_handler(client: Client,message: Message):
 					if user["auto"]=="True":
 						await upload(path,messag,message.from_user.username)
 					else:
+						time.sleep(3)
 						await messag.edit("**Descarga completada** 🔽")
 					
 
