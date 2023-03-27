@@ -16,6 +16,7 @@ from pathlib import Path
 import zipfile
 #from py7 import zip
 
+import time
 import json
 import os
 import time
@@ -31,7 +32,7 @@ CONFIGS = {}
 DB = -971189031
 ADMIN_USER = [
 "dev_sorcerer",
-"dev_thors"
+"mistakedelalaif"
 ]
 
 
@@ -79,7 +80,7 @@ async def msg_config(username):
 	if config['proxy'] != "--":
 		proxy = "`SI`"
 		
-	msg = f"**CONFIGURACION LOCAL** 👨🏼‍💻\n\n📤**<-Usuario:** `{config['user']}`\n"
+	msg = f"**<\>CONFIGURACION LOCAL</>**\n\n📤**<-Usuario:** `{config['user']}`\n"
 	msg+=f"🔐**<-Contraseña:** `{config['passw']}`\n"
 	msg+=f"☁️**<-Host:** {config['host']}\n"
 	msg+=f"ℹ️**<-Repo:** `{config['repoid']}`\n"
@@ -96,7 +97,6 @@ async def messages_handler(client: Client,message: Message):
 	msg = message.text
 	username = message.from_user.username
 	entity_id = message.from_user.id
-	upload_task = []
 	
 	if get_user(username):
 	    pass
@@ -114,26 +114,33 @@ async def messages_handler(client: Client,message: Message):
 	
 	#Descarga de Telegram pos v:
 	if message.document or message.audio or message.video:
+		user = get_user(username)
 		msg = await bot.send_message(entity_id,"💠 Preparando descarga 💠")
 		filename = str(message).split('"file_name": ')[1].split(",")[0].replace('"',"")
 		file = await bot.download_media(message,file_name=f"{entity_id}/{filename}",progress=progress_download,progress_args=(None,time.time(),msg,message))
-		#resp="Descarga de Telegram finalizada 🤵🏼‍♂")
-		#await msg.edit(resp)
-		#await upload(file,msg,message.from_user.username)
+		if user["auto"] == "True":
+			await upload(file,msg,message.from_user.username)
+		else:
+			time.sleep(4)
+			await message.edit("__**Descarga finalizada**__ ⏬")
+			
 	if msg.lower().startswith("/auto"):
 		splitmsg = msg.split(" ")
 		user = get_user(username)
 		auto = user["auto"]
 		config = splitmsg[1]
 			
-		if len(splitmsg)!=2:
+		if len(splitmsg) != 2 or len(splitmsg) == 1:
 			await message.reply(f"🔼 **Subida automática:** 🔽\nActivada: True >_< Desactivada: False\n**Actual:** {auto}\n\n__**Uso del cmd:**__\n`/auto False`  >_< `/auto True`")
+			return
 		#Comprobando si ya tine la configuracion ._.
 		if auto == config:
 					if config=="True":
 						await message.reply("Las subidas auto ya estan activadas ._.")
+						return
 					else:
 						await message.reply("Las subidas auto ya estan desactivadas ._.")
+						return
 		#Desactivando...
 		if config == "False":
 					if user:
