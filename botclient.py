@@ -25,7 +25,7 @@ API_ID = 17617166
 API_HASH = "3ff86cddc30dcd947505e0b8493ce380"
 BOT_TOKEN = os.getenv("TOKEN")
 
-bot = Client("uploader",api_id=API_ID,api_hash=API_HASH,bot_token=BOT_TOKEN)
+bot = Client("anon",api_id=API_ID,api_hash=API_HASH,bot_token=BOT_TOKEN)
 
 CONFIGS = {}
 DB = -971189031
@@ -124,29 +124,26 @@ async def messages_handler(client: Client,message: Message):
 		splitmsg = msg.split(" ")
 		user = get_user(username)
 		auto = user["auto"]
+		config = splitmsg[1]
 			
 		if len(splitmsg)!=2:
 			await message.reply(f"🔼 **Subida automática:** 🔽\nActivada: True >_< Desactivada: False\n**Actual:** {auto}\n\n__**Uso del cmd:**__\n`/auto False`  >_< `/auto True`")
-		#Comprobando si es sonso ._.
-		if splitmsg[1] != "True" or splitmsg[1] != "False":
-			await message.reply("._.")
-			return
 		#Comprobando si ya tine la configuracion ._.
-		if auto==splitmsg[1]:
-					if splitmsg[1]=="True":
+		if auto == config:
+					if config=="True":
 						await message.reply("Las subidas auto ya estan activadas ._.")
 					else:
 						await message.reply("Las subidas auto ya estan desactivadas ._.")
-		#Actibando...
-		if auto=="False":
+		#Desactivando...
+		if config == "False":
 					if user:
-						user["auto"] = "False"
+						user["auto"] = config
 						save_user(username,user)
 						await message.reply("__Subida automática desactivada__ ⏸")
 		#Activando...
-		else:
+		if config == "True":
 					if user:
-						user["auto"] = "True"
+						user["auto"] = config
 						save_user(username,user)
 						await message.reply("__Subida automática activada__ 🔃")
 					
@@ -274,7 +271,7 @@ async def messages_handler(client: Client,message: Message):
 	       size = Path(file_path+"/"+f).stat().st_size
 	       msg_f+=f"{c} - `{f}` <-> **{convertbytes(size)}**\n⬆️ __Subir__ - /up_{c} >_< 🗑 Borrar - /del_{c}\n\n"
 	       c+=1
-	       if str(files) == "[]":
+	   if str(files) == "[]":
 	       	await message.reply("__**El root esta vacio v:**__")
 	       	return
 	   try:
@@ -366,6 +363,8 @@ async def messages_handler(client: Client,message: Message):
 					save_user(message.from_user.username,config)
 					if user["auto"]=="True":
 						await upload(path,messag,message.from_user.username)
+					else:
+						await messag.edit("**Descarga completada** 🔽")
 					
 
 	if msg.lower().startswith("/set_edu"):
@@ -409,7 +408,7 @@ async def progress_download(chunkcurrent,total,file_name,start,message,messag):
 		config = get_user(messag.from_user.username)
 		config["downloaded"]+=total
 		save_user(messag.from_user.username,config)
-		await message.edit("**Descarga completada** 🔽")
+		#await message.edit("**Descarga completada** 🔽")
 		return
 			
 async def upload(pathfull,message,username):
@@ -436,7 +435,7 @@ async def upload(pathfull,message,username):
 		files.close()
 		FILES = files.files
 		zips = user["zips"]
-		await message.edit(f"**Comprimido en partes de {zips}MiB**")
+		await message.edit(f"**Picado y guardado en partes de {zips}MiB**")
 		return
 
 		
@@ -487,7 +486,7 @@ async def upload(pathfull,message,username):
 			            await message.edit("☁️ __Subiendo mediante login__ 👨🏼‍💻")
 			            r = await client.upload_file_draft(pathfull,read_callback=lambda current,total,start: progress_upload(current,total,start,message,name))
 			            if r:
-			            	upload_task.append(r)
+			            	#upload_task.append(r)
 			            	links.append(r)
 			            break	
 			    except Exception as ex:
