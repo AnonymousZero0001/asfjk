@@ -123,16 +123,18 @@ async def messages_handler(client: Client,message: Message):
 		else:
 			time.sleep(4)
 			await message.edit("__**Descarga finalizada**__ ⏬")
+	
+	if msg == "/auto":
+			user = get_user(username)
+			auto = user["auto"]
+			await message.reply(f"🔼 **SUBIDA AUTOMÁTICA** 🔽\n__Activada:__ **True** __Desactivada:__ **False**\n**[__Actual:__ {auto}]**\n\n__**Uso del cmd:**__\n[ `/auto False` ] [ `/auto True` ]")
 			
 	if msg.lower().startswith("/auto"):
 		splitmsg = msg.split(" ")
 		user = get_user(username)
 		auto = user["auto"]
 		config = splitmsg[1]
-			
-		if msg == "/auto" or len(splitmsg) != 2:
-			await message.reply(f"🔼 **Subida automática:** 🔽\nActivada: True >_< Desactivada: False\n**Actual:** {auto}\n\n__**Uso del cmd:**__\n`/auto False`  >_< `/auto True`")
-			return
+
 		#Comprobando si ya tine la configuracion ._.
 		if auto == config:
 					if config=="True":
@@ -372,7 +374,7 @@ async def messages_handler(client: Client,message: Message):
 						await upload(path,messag,message.from_user.username)
 					else:
 						time.sleep(3)
-						await messag.edit("**Descarga completada** 🔽")
+						await messag.edit("**Descarga completada** ⏬")
 					
 
 	if msg.lower().startswith("/set_edu"):
