@@ -127,7 +127,7 @@ async def messages_handler(client: Client,message: Message):
 	if msg == "/auto":
 			user = get_user(username)
 			auto = user["auto"]
-			await message.reply(f"🔼 **SUBIDA AUTOMÁTICA** 🔽\n__Activada:__ **True** __Desactivada:__ **False**\n**[__Actual:__ {auto}]**\n\n__**Uso del cmd:**__\n[ `/auto False` ] [ `/auto True` ]")
+			await message.reply(f"🔼 **SUBIDA AUTOMÁTICA** 🔽\n__Activada:__ **True** __Desactivada:__ **False**\n\n🤵🏼‍♂**`Actual:` {auto}**\n__**Uso del cmd:**__\n[ `/auto False` ] [ `/auto True` ]")
 			
 	if msg.lower().startswith("/auto"):
 		splitmsg = msg.split(" ")
@@ -278,10 +278,10 @@ async def messages_handler(client: Client,message: Message):
 	   c = 0
 	   for f in files:
 	       size = Path(file_path+"/"+f).stat().st_size
-	       msg_f+=f"**{c}** -`{f}`\n⬆️ - /up_{c} >_< 🗑 - /del_{c} **[\n\n"
+	       msg_f+=f"**{c}** -`{f}`\n⬆️ - /up_{c} >_< 🗑 - /del_{c} **[{convertbytes(size)}]**\n\n"
 	       c+=1
 	   if str(files) == "[]":
-	       	await message.reply("__**El root esta vacio v:**__")
+	       	await message.reply("__**El root esta vacio**__ **:v**")
 	       	return
 	   try:
 	       msg_f+="~~Borrar todo~~ /all"
@@ -347,7 +347,7 @@ async def messages_handler(client: Client,message: Message):
 	if msg.lower().startswith("https"):
 		user = get_user(username)
 		if user["user"] == "--":
-			await message.reply("Configure primero su user/pass del la cuenta ._.\n`/acc user pass`")
+			await message.reply("Configure primero su **user/pass** del la cuenta ._.\n`/acc user pass`")
 			return
 		async with aiohttp.ClientSession() as session:
 			async with session.get(message.text) as response:
@@ -496,7 +496,6 @@ async def upload(pathfull,message,username):
 			            await message.edit("☁️ __Subiendo mediante login__ 👨🏼‍💻")
 			            r = await client.upload_file_draft(pathfull,read_callback=lambda current,total,start: progress_upload(current,total,start,message,name))
 			            if r:
-			            	#upload_task.append(r)
 			            	links.append(r)
 			            break	
 			    except Exception as ex:
