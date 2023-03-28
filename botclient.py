@@ -121,8 +121,8 @@ async def messages_handler(client: Client,message: Message):
 		if user["auto"] == "True":
 			await upload(file,msg,message.from_user.username)
 		else:
-			time.sleep(4)
-			await message.edit("__**Descarga finalizada**__ ⏬")
+			time.sleep(3)
+			await msg.edit("__**Descarga finalizada**__ ⏬")
 	
 	if msg == "/auto":
 			user = get_user(username)
@@ -278,7 +278,7 @@ async def messages_handler(client: Client,message: Message):
 	   c = 0
 	   for f in files:
 	       size = Path(file_path+"/"+f).stat().st_size
-	       msg_f+=f"**{c}** -`{f}`\n⬆️ - /up_{c} >_< 🗑 - /del_{c} **[{convertbytes(size)}]**\n\n"
+	       msg_f+=f"**{c}** - `{f}`\n⬆️- /up_{c} >_< 🗑- /del_{c} **[{convertbytes(size)}]**\n\n"
 	       c+=1
 	   if str(files) == "[]":
 	       	await message.reply("__**El root esta vacio**__ **:v**")
