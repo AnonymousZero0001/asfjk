@@ -26,15 +26,24 @@ API_ID = 17617166
 API_HASH = "3ff86cddc30dcd947505e0b8493ce380"
 BOT_TOKEN = os.getenv("TOKEN")
 
-bot = Client("anon",api_id=API_ID,api_hash=API_HASH,bot_token=BOT_TOKEN)
+bot = Client("uploader",api_id=API_ID,api_hash=API_HASH,bot_token=BOT_TOKEN)
 
 CONFIGS = {}
 DB = -971189031
 ADMIN_USER = [
-"dev_sorcerer",
-"mistakedelalaif"
+"dev_sorcerer"
 ]
 
+def bar(percentage):
+  hashes = int(percentage / 6)
+  spaces = 20 - hashes
+
+  progress_bar =  "•" * hashes + "×" * spaces 
+  percentage_pos = int(hashes / 1)
+
+  percentage_string = str(percentage) + "%"
+  progress_bar = "**[" + progress_bar[:percentage_pos] + percentage_string + progress_bar[percentage_pos + len(percentage_string):] + "]**"
+  return progress_bar
 
 def create_user(username):
 	CONFIGS[username] = {"name":username,"user":"--","passw":"--","host":"--","repoid":"--","zips":"--","proxy":"--","auto":"True","uploaded":0,"downloaded":0}
@@ -120,9 +129,8 @@ async def messages_handler(client: Client,message: Message):
 		file = await bot.download_media(message,file_name=f"{entity_id}/{filename}",progress=progress_download,progress_args=(None,time.time(),msg,message))
 		if user["auto"] == "True":
 			await upload(file,msg,message.from_user.username)
-		else:
-			time.sleep(3)
-			await msg.edit("__**Descarga finalizada**__ ⏬")
+		if user["auto"] == "False":
+			await message.edit("__**Descarga finalizada**__ ⏬")
 	
 	if msg == "/auto":
 			user = get_user(username)
@@ -278,7 +286,7 @@ async def messages_handler(client: Client,message: Message):
 	   c = 0
 	   for f in files:
 	       size = Path(file_path+"/"+f).stat().st_size
-	       msg_f+=f"**{c}** - `{f}`\n⬆️- /up_{c} >_< 🗑- /del_{c} **[{convertbytes(size)}]**\n\n"
+	       msg_f+=f"**{c}** -`{f}`\n⬆️ - /up_{c} >_< 🗑 - /del_{c} **[{convertbytes(size)}]**\n\n"
 	       c+=1
 	   if str(files) == "[]":
 	       	await message.reply("__**El root esta vacio**__ **:v**")
@@ -408,7 +416,8 @@ async def progress_download(chunkcurrent,total,file_name,start,message,messag):
 	msg+=f"📥-Descargado: {convertbytes(chunkcurrent)}\n"
 	msg+=f"📦-Total: {convertbytes(total)}\n"
 	msg+=f"⚡-Velocidad: {convertbytes(speed)}/s\n"
-	msg+=f"📶-Progreso: {percent}%\n"
+	msg+=f"📶-Progreso: {percent}%\n\n"
+	msg+=f"{bar(percent)}"
 	try:
 		await message.edit(msg)
 	except:
@@ -527,7 +536,8 @@ def progress_upload(current,total,start,message,file_name):
 	msg+= f"📤-Subido: {convertbytes(current)}\n"
 	msg+=f"📦-Total: {convertbytes(total)}\n"
 	msg+=f"⚡-Velocidad: {convertbytes(speed)}/s\n"
-	msg+=f"📶-Progreso: {percent}%\n"
+	msg+=f"📶-Progreso: {percent}%\n\n"
+	msg+=f"{bar(percent)}"
 	try:
 		message.edit(msg,reply_markup=message.reply_markup)
 	except:
